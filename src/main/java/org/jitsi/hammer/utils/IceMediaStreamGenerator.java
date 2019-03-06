@@ -46,12 +46,12 @@ public class IceMediaStreamGenerator
      * The minimum value that will be used as port when generating new
      * <tt>IceMediaStream</tt>.
      */
-    private static int MIN_COMPONENT_PORT = 6000;
+    private static final int MIN_COMPONENT_PORT = 6000;
     /**
      * The maximum value that will be used as port when generating new
      * <tt>IceMediaStream</tt>.
      */
-    private static int MAX_COMPONENT_PORT = 9000;
+    private static final int MAX_COMPONENT_PORT = 9000;
 
     /**
      * The current value that will be used as port when generating new
@@ -74,12 +74,12 @@ public class IceMediaStreamGenerator
      * @arg max_port The maximum value a port
      * of an generated <tt>IceMediaStream</tt> can be.
      */
-    public IceMediaStreamGenerator(int min_port, int max_port)
-    {
-        MIN_COMPONENT_PORT = min_port;
-        currentComponentPort = min_port;
-        MAX_COMPONENT_PORT = max_port;
-    }
+//    public IceMediaStreamGenerator(int min_port, int max_port)
+//    {
+//        MIN_COMPONENT_PORT = min_port;
+//        currentComponentPort = min_port;
+//        MAX_COMPONENT_PORT = max_port;
+//    }
 
     /**
      * Get the static instance of the <tt>IceMediaStreamGenerator</tt>
@@ -143,6 +143,7 @@ public class IceMediaStreamGenerator
         //  for everything
         synchronized (this)
         {
+            System.out.println("Create media stream...");
             stream = agent.createMediaStream(IceMediaStreamGenerator.STREAM_NAME);
             if( (currentComponentPort + 1) >= MAX_COMPONENT_PORT )
             {

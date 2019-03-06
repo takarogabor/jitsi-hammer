@@ -59,6 +59,8 @@ public class ConferenceInitiationIQ extends IQ
      */
     private HostInfo serverInfo;
 
+    private String roomName;
+
     /**
      * The random <tt>UUID</tt> to use in conference initiation as a machine UID
      */
@@ -94,7 +96,7 @@ public class ConferenceInitiationIQ extends IQ
     {
         if (serverInfo != null)
         {
-            xml.attribute(ROOM_ATTR_NAME, serverInfo.getRoomURL());
+            xml.attribute(ROOM_ATTR_NAME, serverInfo.getRoomURL(roomName));
         }
         xml.attribute(MACHINE_UID_ATTR_NAME, machineUID.toString());
 
@@ -114,8 +116,9 @@ public class ConferenceInitiationIQ extends IQ
      * @param serverInfo a <tt>HostInfo</tt> instance associated with 
      *                   this Hammer instance
      */
-    public void setServerInfo(HostInfo serverInfo) {
+    public void setServerInfo(HostInfo serverInfo, String roomName) {
         this.serverInfo = serverInfo;
+        this.roomName = roomName;
     }
     
 }

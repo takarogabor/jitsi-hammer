@@ -20,6 +20,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import org.kohsuke.args4j.*;
 
 /**
@@ -224,7 +226,13 @@ public class CmdLineArguments
     @Option(name="-simulcastMode", usage="sets " +
             "'simulcastMode' conference parameter")
     private String simulcastMode = "rewriting";
-    
+
+    /**
+     * The "JWT secret" property
+     */
+    @Option(name="-jwtsecret", usage="sets " +
+            "'jwtsecret' parameter")
+    private String jwtsecret = null;
 
     /**
      * Create a <tt>ConferenceInfo</tt> from the CLI options
@@ -446,8 +454,12 @@ public class CmdLineArguments
             line = in.readLine();
             while(line != null)
             {
-                credentials = line.split(":", 2);
-                list.add(new Credential(credentials[0],credentials[1]));
+                credentials = line.split(":", 3);
+                if ("JWT".equalsIgnoreCase(credentials[1])) {
+					list.add(new Credential(credentials[0], generateJWT(credentials[0]), credentials[2]));
+				} else {
+					list.add(new Credential(credentials[0], credentials[1], credentials[2]));
+				}
                 line = in.readLine();
             }
             in.close();
@@ -455,8 +467,19 @@ public class CmdLineArguments
         catch (Exception e)
         {
             list.clear();
+            e.printStackTrace();
         }
 
         return list;
     }
+
+	private String generateJWT(String subject) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtsecret);
+        String token = JWT.create()
+                .withIssuer("auth0")
+                .withSubject(subject)
+                .sign(algorithm);
+
+        return token;
+	}
 }

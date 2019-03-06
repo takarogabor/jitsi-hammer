@@ -30,6 +30,7 @@ import org.jivesoftware.smack.iqrequest.AbstractIqRequestHandler;
 import org.jivesoftware.smack.iqrequest.IQRequestHandler;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.sasl.core.SCRAMSHA1Mechanism;
 import org.jivesoftware.smackx.disco.*;
 import org.jivesoftware.smackx.muc.*;
 import org.jivesoftware.smackx.nick.packet.*;
@@ -162,6 +163,8 @@ public class FakeUser implements StanzaListener
 
     private final DtlsControl dtlsControl = new DtlsControlImpl();
 
+    private String roomName;
+
     /**
      * Construct the conference focus JID 
      * (or get one from the server info if provided)
@@ -254,7 +257,8 @@ public class FakeUser implements StanzaListener
                     .setPort(serverInfo.getPort())
                     .setXmppDomain(serverInfo.getXMPPDomain())
                     .setDebuggerEnabled(smackDebug)
-                    .performSaslAnonymousAuthentication()
+//                    .performSaslAnonymousAuthentication()
+                    .addEnabledSaslMechanism(SCRAMSHA1Mechanism.PLAIN)
                     .build();
         }
         catch (XmppStringprepException e)
@@ -343,7 +347,7 @@ public class FakeUser implements StanzaListener
                     case SESSION_INITIATE:
                         logger.info("Received session-initiate");
                         sessionInitiate = jiq;
-                        acceptJingleSession();
+                        acceptJingleSession(FakeUser.this.roomName);
                 }
                 return result;
             }
@@ -401,7 +405,7 @@ public class FakeUser implements StanzaListener
             logger.fatal("Interrupted while making xmpp connection: " + e.toString());
             System.exit(1);
         }
-        connectMUC();
+        connectMUC(null);
     }
 
     /**
@@ -410,23 +414,25 @@ public class FakeUser implements StanzaListener
      * @throws XMPPException if the connection to the XMPP server goes wrong
      * @throws XMPPException on XMPP protocol errors
      */
-    public void start(String username,String password)
+    public void start(String username,String password, String roomName)
             throws SmackException,
             IOException,
             XMPPException
     {
-        //TODO(brian)
-//        logger.info(this.nickname + " : Login with username "
-//                + username + " to the XMPP server.");
-//        connection.connect();
-//        connection.login(username, password, "Jitsi-Hammer");
-//
-//      //set the highest priority possible
-//        Presence presence = new Presence(Presence.Type.available);
-//        presence.setPriority(128);
-//        presence.setStatus("Fake User");
-//        connection.sendPacket(presence);
-//        connectMUC();
+        logger.info(this.nickname + " : Login with username "
+                + username + " to the XMPP server.");
+        try
+        {
+            connection.connect();
+            connection.login(username, password);
+        }
+        catch (InterruptedException e)
+        {
+            logger.fatal("Interrupted while making xmpp connection: " + e.toString());
+            System.exit(1);
+        }
+        this.roomName = roomName;
+        connectMUC(roomName);
     }
 
     /**
@@ -437,14 +443,14 @@ public class FakeUser implements StanzaListener
      * @throws  XMPPException on XMPP protocol errors
      * @throws  IOException on I/O errors
      */
-    private void inviteFocus() 
+    private void inviteFocus(String roomName)
             throws SmackException, XMPPException, IOException 
     {
         ConferenceInitiationIQ conferenceInitiationIQ 
                 = new ConferenceInitiationIQ();
         conferenceInitiationIQ.setTo(this.getFocusJID());
         conferenceInitiationIQ.setType(IQ.Type.set);
-        conferenceInitiationIQ.setServerInfo(serverInfo);
+        conferenceInitiationIQ.setServerInfo(serverInfo, roomName);
         conferenceInitiationIQ.addConferenceProperty(
                 new ConferencePropertyPacketExtension(
                         "channelLastN", this.conferenceInfo.getChannelLastN()));
@@ -502,10 +508,10 @@ public class FakeUser implements StanzaListener
      * @throws SmackException on connection-level errors (i.e. BOSH problems)
      * @throws IOException for I/O problems
      */
-    private void connectMUC() throws SmackException, XMPPException, IOException
+    private void connectMUC(String roomName) throws SmackException, XMPPException, IOException
     {
         mucManager = MultiUserChatManager.getInstanceFor(connection);
-        String roomURL = serverInfo.getRoomURL();
+        String roomURL = serverInfo.getRoomURL(roomName);
         logger.info(this.nickname + " : Trying to connect to MUC " + roomURL);
         muc = mucManager.getMultiUserChat(JidCreate.entityBareFrom(roomURL));
         while(true)
@@ -533,7 +539,7 @@ public class FakeUser implements StanzaListener
                 {
                     
                     if (!this.hammer.getFocusInvited()) {
-                        inviteFocus();
+                        inviteFocus(roomName);
                     }
                     
                 }
@@ -625,7 +631,7 @@ public class FakeUser implements StanzaListener
      * The initiator is taken from the From attribute
      * of the initiate-session message.
      */
-    private void acceptJingleSession()
+    private void acceptJingleSession(String roomName)
     {
         Map<String, NewContentPacketExtension> contentMap = new HashMap<>();
         /*
@@ -766,7 +772,7 @@ public class FakeUser implements StanzaListener
         Jid recipient = null;
         try
         {
-            recipient = JidCreate.entityFullFrom(serverInfo.getRoomName()
+            recipient = JidCreate.entityFullFrom(roomName
                     +"@"
                     +serverInfo.getMUCDomain()
                     + "/"
@@ -954,7 +960,7 @@ public class FakeUser implements StanzaListener
             if(sessionInitiate == null)
             {
                 sessionInitiate = jiq;
-                acceptJingleSession();
+                acceptJingleSession(FakeUser.this.roomName);
             }
             else
             {

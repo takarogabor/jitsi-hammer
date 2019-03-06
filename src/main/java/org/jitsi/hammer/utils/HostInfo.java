@@ -136,10 +136,10 @@ public class HostInfo
      * (in lower case).
      * @return the room name of a MUC (in lower case).
      */
-    public String getRoomName()
-    {
-        return this.roomName.toLowerCase();
-    }
+//    public String getRoomName()
+//    {
+//        return this.roomName.toLowerCase();
+//    }
 
     /**
      * Get the port number of the XMPP server of this <tt>HostInfo</tt>.
@@ -184,9 +184,9 @@ public class HostInfo
      *
      * @return URL for the corresponding conference
      */
-    public String getRoomURL()
+    public String getRoomURL(String roomName)
     {
-        return this.roomName + "@" + this.MUCdomain;
+        return (roomName == null ? this.roomName : roomName) + "@" + this.MUCdomain;
     }
 
     /**

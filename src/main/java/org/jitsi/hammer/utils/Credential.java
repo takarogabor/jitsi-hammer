@@ -34,6 +34,8 @@ public class Credential
      */
     private String password;
 
+    private String roomName;
+
     /**
      * Empty constructor : does nothing.
      */
@@ -44,10 +46,11 @@ public class Credential
      * @param username the username to be set.
      * @param password the password to be set.
      */
-    public Credential(String username, String password)
+    public Credential(String username, String password, String roomName)
     {
         this.username = username;
         this.password = password;
+        this.roomName = roomName;
     }
 
     /**
@@ -86,9 +89,16 @@ public class Credential
         return this.password;
     }
 
+    public String getRoomName() {
+        return roomName;
+    }
+
     @Override
-    public String toString()
-    {
-        return "("+username+" , "+password+")";
+    public String toString() {
+        return "Credential{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", roomName='" + roomName + '\'' +
+                '}';
     }
 }
