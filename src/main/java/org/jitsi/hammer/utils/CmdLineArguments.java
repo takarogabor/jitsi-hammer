@@ -454,12 +454,14 @@ public class CmdLineArguments
             line = in.readLine();
             while(line != null)
             {
-                credentials = line.split(":", 3);
-                if ("JWT".equalsIgnoreCase(credentials[1])) {
-					list.add(new Credential(credentials[0], generateJWT(credentials[0]), credentials[2]));
-				} else {
-					list.add(new Credential(credentials[0], credentials[1], credentials[2]));
-				}
+                if (!line.trim().startsWith("#")) {
+                    credentials = line.split(":", 3);
+                    if ("JWT".equalsIgnoreCase(credentials[1])) {
+                        list.add(new Credential(credentials[0], generateJWT(credentials[0]), credentials[2]));
+                    } else {
+                        list.add(new Credential(credentials[0], credentials[1], credentials[2]));
+                    }
+                }
                 line = in.readLine();
             }
             in.close();

@@ -50,6 +50,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
 
 /**
@@ -64,6 +65,9 @@ import java.util.*;
  */
 public class FakeUser implements StanzaListener
 {
+
+    private static final long DEFAULT_TIMEOUT_MS = 5000;
+
     /**
      * The <tt>Logger</tt> used by the <tt>FakeUser</tt> class and its
      * instances for logging output.
@@ -383,6 +387,17 @@ public class FakeUser implements StanzaListener
         org.jivesoftware.smackx.ping.PingManager.getInstanceFor(connection).setPingInterval(15);
     }
 
+    private void waitFor(BooleanSupplier booleanSupplier) throws InterruptedException {
+        long startTime = System.currentTimeMillis();
+        while(!booleanSupplier.getAsBoolean()) {
+            if (System.currentTimeMillis() - startTime > DEFAULT_TIMEOUT_MS) {
+                throw new IllegalStateException("Wait for operation timed out!");
+            }
+            Thread.sleep(10);
+        }
+    }
+
+
     /**
      * Connect to the XMPP server, login anonymously then join the MUC chatroom.
      * @throws XMPPException on XMPP protocol errors
@@ -398,6 +413,7 @@ public class FakeUser implements StanzaListener
         try
         {
             connection.connect();
+            waitFor(() -> connection.getFeature(Mechanisms.ELEMENT, Mechanisms.NAMESPACE) != null);
             connection.login();
         }
         catch (InterruptedException e)
@@ -424,6 +440,7 @@ public class FakeUser implements StanzaListener
         try
         {
             connection.connect();
+            waitFor(() -> connection.getFeature(Mechanisms.ELEMENT, Mechanisms.NAMESPACE) != null);
             connection.login(username, password);
         }
         catch (InterruptedException e)
@@ -480,7 +497,7 @@ public class FakeUser implements StanzaListener
         try 
         {
             this.connection.sendStanza(conferenceInitiationIQ);
-            this.hammer.setFocusInvited(true);
+            this.hammer.setFocusInvited(roomName, true);
             logger.info("Conference initiation IQ is sent to the focus user");
         }
         catch (SmackException.NotConnectedException e) {
@@ -538,7 +555,7 @@ public class FakeUser implements StanzaListener
                 synchronized (this.hammer.getFocusInvitationSyncRoot())
                 {
                     
-                    if (!this.hammer.getFocusInvited()) {
+                    if (!this.hammer.getFocusInvited(roomName)) {
                         inviteFocus(roomName);
                     }
                     
@@ -596,6 +613,8 @@ public class FakeUser implements StanzaListener
             agent.free();
         for(MediaStream stream : mediaStreamMap.values())
         {
+
+            stream.stop();
             stream.close();
         }
         if(connection !=null)

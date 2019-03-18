@@ -110,7 +110,7 @@ public class Hammer
      * The boolean flag identifying whether focus has been invited
      * to the conference targeted by this <tt>Hammer</tt> or not
      */
-    private boolean focusInvited = false;
+    private Map<String, Boolean> focusInvited = new HashMap<>();
     
     /**
      * The locations of the OSGi bundles (or rather of the path of the class
@@ -485,10 +485,10 @@ public class Hammer
             logger.warn("Hammer already stopped !");
             return;
         }
-
-        logger.info("Stoppig the Hammer : stopping all FakeUser");
+        logger.info("Stoppig the Hammer : stopping all FakeUser:" + fakeUsers);
         for(FakeUser user : fakeUsers)
         {
+            logger.info("Stoppig user");
             user.stop();
         }
 
@@ -530,18 +530,20 @@ public class Hammer
      * 
      * @return the focus invitation boolean flag
      */
-    public boolean getFocusInvited() 
+    public boolean getFocusInvited(String roomName)
     {
-        return this.focusInvited;
+        Boolean invited = this.focusInvited.get(roomName);
+        return this.focusInvited == null ? false : invited;
     }
 
     /**
      * Set the boolean flag identifying whether this Focus has been invited 
      * to the conference this <tt>Hammer</tt> targeting or not
      */
-    public void setFocusInvited(boolean focusInvited) 
+    public void setFocusInvited(String roomName, boolean focusInvited)
     {
-        this.focusInvited = focusInvited;
+
+        this.focusInvited.put(roomName, focusInvited);
     }
 
     /**
