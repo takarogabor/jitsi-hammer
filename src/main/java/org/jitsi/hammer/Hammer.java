@@ -533,7 +533,7 @@ public class Hammer
     public boolean getFocusInvited(String roomName)
     {
         Boolean invited = this.focusInvited.get(roomName);
-        return this.focusInvited == null ? false : invited;
+        return invited == null ? false : invited;
     }
 
     /**
