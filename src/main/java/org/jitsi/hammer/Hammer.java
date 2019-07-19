@@ -372,7 +372,7 @@ public class Hammer
                 user = userIt.next();
                 credential = credIt.next();
 
-                user.start(credential.getUsername(),credential.getPassword(),credential.getRoomName());
+                user.start(credential.getUsername(),credential.getPassword(),credential.getRoomName(), credential.getCustomVideoPath());
                 if (hammerStats != null
                         && (userStats = user.getFakeUserStats()) != null)
                     hammerStats.addFakeUsersStats(userStats);

@@ -168,8 +168,9 @@ public class FakeUser implements StanzaListener
     private final DtlsControl dtlsControl = new DtlsControlImpl();
 
     private String roomName;
+	private String customVideoPath;
 
-    /**
+	/**
      * Construct the conference focus JID 
      * (or get one from the server info if provided)
      *
@@ -430,12 +431,13 @@ public class FakeUser implements StanzaListener
      * @throws XMPPException if the connection to the XMPP server goes wrong
      * @throws XMPPException on XMPP protocol errors
      */
-    public void start(String username,String password, String roomName)
+    public void start(String username,String password, String roomName, String customVideoPath)
             throws SmackException,
             IOException,
             XMPPException
     {
-        logger.info(this.nickname + " : Login with username "
+		this.customVideoPath = customVideoPath;
+		logger.info(this.nickname + " : Login with username "
                 + username + " to the XMPP server.");
         try
         {
@@ -763,13 +765,23 @@ public class FakeUser implements StanzaListener
          * Configure the MediaStreams with the selected MediaFormats and with
          *  the selected MediaDevice (via the MediaDeviceChooser)
          */
-        HammerUtils.configureMediaStream(
-            mediaStreamMap,
-            selectedFormats,
-            selectedRtpExtensions,
-            mediaDeviceChooser,
-            ptRegistry,
-            rtpExtRegistry);
+        if (customVideoPath != null ) {
+            HammerUtils.configureMediaStream(
+                    mediaStreamMap,
+                    selectedFormats,
+                    selectedRtpExtensions,
+                    customVideoPath,
+                    ptRegistry,
+                    rtpExtRegistry);
+        } else {
+            HammerUtils.configureMediaStream(
+                    mediaStreamMap,
+                    selectedFormats,
+                    selectedRtpExtensions,
+                    mediaDeviceChooser,
+                    ptRegistry,
+                    rtpExtRegistry);
+        }
 
         /*
          * Now that the MediaStreams are configured, add their SSRCs to the

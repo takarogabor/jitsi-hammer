@@ -311,6 +311,19 @@ public class HammerUtils
         return mediaStreamMap;
     }
 
+    public static void configureMediaStream(
+            Map<String,MediaStream> mediaStreamMap,
+            Map<String,MediaFormat> mediaFormatMap,
+            Map<String,List<RTPExtension>> rtpExtensionMap,
+            String customVideoPath,
+            DynamicPayloadTypeRegistry ptRegistry,
+            DynamicRTPExtensionsRegistry rtpExtRegistry)
+    {
+
+        CmdLineArguments cmdLineArguments = new CmdLineArguments();
+        cmdLineArguments.setIvffile(customVideoPath);
+        configureMediaStream(mediaStreamMap, mediaFormatMap, rtpExtensionMap, new MediaDeviceChooser(cmdLineArguments), ptRegistry, rtpExtRegistry);
+    }
 
     /**
      * Configure the <tt>MediaStream</tt> contained in <tt>mediaStreamMap</tt>

@@ -328,6 +328,10 @@ public class CmdLineArguments
         return ivffile;
     }
 
+    public void setIvffile(String ivffile) {
+        this.ivffile = ivffile;
+    }
+
     /**
      * Get The path of a rtpdump file containing recorded VP8 RTP packets
      * that will be read for the video stream if it was
@@ -455,11 +459,15 @@ public class CmdLineArguments
             while(line != null)
             {
                 if (!line.trim().startsWith("#")) {
-                    credentials = line.split(":", 3);
+                    credentials = line.split(":", 4);
+                    String customVideoPath = null;
+                    if (credentials.length == 4) {
+                        customVideoPath = credentials[3];
+                    }
                     if ("JWT".equalsIgnoreCase(credentials[1])) {
-                        list.add(new Credential(credentials[0], generateJWT(credentials[0]), credentials[2]));
+                        list.add(new Credential(credentials[0], generateJWT(credentials[0]), credentials[2], customVideoPath));
                     } else {
-                        list.add(new Credential(credentials[0], credentials[1], credentials[2]));
+                        list.add(new Credential(credentials[0], credentials[1], credentials[2], customVideoPath));
                     }
                 }
                 line = in.readLine();

@@ -35,6 +35,7 @@ public class Credential
     private String password;
 
     private String roomName;
+    private String customVideoPath;
 
     /**
      * Empty constructor : does nothing.
@@ -51,6 +52,19 @@ public class Credential
         this.username = username;
         this.password = password;
         this.roomName = roomName;
+    }
+
+    /**
+     * Create a <tt>Credential</tt> with already set username and password.
+     * @param username the username to be set.
+     * @param password the password to be set.
+     */
+    public Credential(String username, String password, String roomName, String customVideoPath)
+    {
+        this.username = username;
+        this.password = password;
+        this.roomName = roomName;
+        this.customVideoPath = customVideoPath;
     }
 
     /**
@@ -93,12 +107,17 @@ public class Credential
         return roomName;
     }
 
+    public String getCustomVideoPath() {
+        return customVideoPath;
+    }
+
     @Override
     public String toString() {
         return "Credential{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", roomName='" + roomName + '\'' +
+                ", customVideoPath='" + customVideoPath + '\'' +
                 '}';
     }
 }
